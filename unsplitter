@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function help() {
+    echo "unsplitter v1.0"
+    echo "  Usage: unsplitter d t a"
+    echo "      d -> what to download"
+    echo "      t -> (optional) temp directory to continue downloading into"
+    echo "      a -> (optional) start downloading at this piece"
+}
+if [ $# -lt 1 ]; then
+  echo 1>&2 "$0: not enough arguments"
+  help
+  exit 2
+elif [ $# -gt 3 ]; then
+  echo 1>&2 "$0: too many arguments"
+  help
+  exit 2
+fi
+
+ip=162.243.47.28
+file="$1"
+temp=${2:-$(mktemp -d)}
+begin="$(( ${3:-1} - 1 ))"
+url="$ip/$file"
+echo "downloading from: $url"
+end=$(curl -s $url)
+echo "file will come in $end parts"
+
+echo "temp directory: $temp"
+
+(
+cd "$temp"
+for ((i=begin;i<=$(( end - 1 ));i++)); do
+  n=$(printf "%03d\n" ${i})
+  echo "downloading part $((i + 1))/$((end + 1))"
+  curl -Os "$ip/$file/piece-$n"
+done
+)
+
+cat "$temp/piece-"* > $file.mp4
