@@ -32,7 +32,7 @@ echo "temp directory: $temp"
 cd "$temp"
 for ((i=begin;i<=$(( end - 1 ));i++)); do
   n=$(printf "%03d\n" ${i})
-  echo "downloading part $((i + 1))/$end"
+  echo "downloading part $((i + 1))/$((end - 1))"
   curl -Os "$ip/$file/piece-$n"
 done
 )
